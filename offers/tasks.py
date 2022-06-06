@@ -24,6 +24,25 @@ def send_mail_to_users(to,title,validity):
     except:
         return False 
 
+def daily_mail_sender(to):
+        # logic to send mail to user
+    sender_mail = f"{settings.MAIL_SENDER}"
+    password_sender = f"{settings.PASS_MAIL}"
+    message = EmailMessage()
+    message['To'] = to
+    message['From'] = sender_mail
+    message['Subject'] = "Welcome to Django-Celery"
+    message.set_content(
+        f"Hello User Good morning from django celery.")
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls() 
+        server.login(sender_mail, password_sender)
+        server.send_message(message)
+        return True         # success 
+    except:
+        return False 
+
 
 
 @shared_task(bind=True)
@@ -34,4 +53,11 @@ def send_mail(self):
     users = User.objects.all()
     for user in users:
         send_mail_to_users(user.email,title,validity)
+    return "Done"
+
+@shared_task(bind=True)
+def send_dailymail(self):
+    users = User.objects.all()
+    for user in users:
+        daily_mail_sender(user.email)
     return "Done"
